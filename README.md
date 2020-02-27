@@ -1,11 +1,37 @@
 This repository contains the official [Sight API](https://siftrics.com/) Clojure client. The Sight API is a text recognition service.
 
+[![Clojars Project](https://img.shields.io/clojars/v/sight.svg)](https://clojars.org/sight)
+
 # Quickstart
 
-1. Add the Leiningen dependency:
+1. Add this project as a dependency.
+
+Leiningen/Boot:
 
 ```
-TODO
+[sight "1.0.0"]
+```
+
+Clojure CLI/deps.edn:
+
+```
+sight {:mvn/version "1.0.0"}
+```
+
+Gradle
+
+```
+compile 'sight:sight:1.0.0
+```
+
+Maven
+
+```
+<dependency>
+  <groupId>sight</groupId>
+  <artifactId>sight</artifactId>
+  <version>1.0.0</version>
+</dependency>
 ```
 
 2. Grab an API key from the [Sight dashboard](https://siftrics.com/).
@@ -13,7 +39,6 @@ TODO
 
 ```
 (def client (->Client "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"))
-
 (def pages (recognize client (list "invoice.pdf" "receipt.png")))
 ```
 
