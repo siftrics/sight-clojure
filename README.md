@@ -1,6 +1,6 @@
-This repository contains the official [Sight API](https://siftrics.com/) Clojure client. The Sight API is a text recognition service.
-
 [![Clojars Project](https://img.shields.io/clojars/v/sight.svg)](https://clojars.org/sight)
+
+This repository contains the official [Sight API](https://siftrics.com/) Clojure client. The Sight API is a text recognition service.
 
 # Quickstart
 
