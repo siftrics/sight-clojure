@@ -6,25 +6,25 @@ This repository contains the official [Sight API](https://siftrics.com/) Clojure
 
 1. Add this project as a dependency.
 
-Leiningen/Boot:
+### Leiningen/Boot:
 
 ```
 [sight "1.0.0"]
 ```
 
-Clojure CLI/deps.edn:
+### Clojure CLI/deps.edn:
 
 ```
 sight {:mvn/version "1.0.0"}
 ```
 
-Gradle
+### Gradle
 
 ```
 compile 'sight:sight:1.0.0
 ```
 
-Maven
+### Maven
 
 ```
 <dependency>
@@ -34,8 +34,17 @@ Maven
 </dependency>
 ```
 
-2. Grab an API key from the [Sight dashboard](https://siftrics.com/).
-3. Create a client, passing your API key into the constructor, and recognize text:
+2. Require or import the package. For example, add it to `:require`:
+
+```
+(ns my-namespace
+  ...
+  (:require ...
+            [sight]))
+```
+
+3. Grab an API key from the [Sight dashboard](https://siftrics.com/).
+4. Create a client, passing your API key into the constructor, and recognize text:
 
 ```
 (def client (->Client "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"))
@@ -82,8 +91,6 @@ Maven
 ```
 
 ## Word-Level Bounding Boxes
-
-TODO
 
 `recognize` has an additional signature with a third parameter, `word-level-bounding-boxes`. If it's `true` then word-level bounding boxes are returned instead of sentence-level bounding boxes. E.g.,
 
