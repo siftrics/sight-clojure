@@ -128,7 +128,7 @@
 (defn recognize
   "Recognize text in the given files"
   ([client file-paths] (recognize client file-paths false))
-  ([client file-paths word-level-bounding-boxes]
+  ([client file-paths word-level-bounding-boxes?]
    (recognize-payload
      client
-     (make-payload file-paths word-level-bounding-boxes))))
+     (make-payload file-paths word-level-bounding-boxes?))))
