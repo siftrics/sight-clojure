@@ -105,3 +105,8 @@ Here is the [official documentation for the Sight API](https://siftrics.com/docs
 # Apache V2 License
 
 This code is licensed under Apache V2.0. The full text of the license can be found in the "LICENSE" file.
+
+# Contributors
+
+* [Siftrics Founder](https://github.com/siftrics/)
+* [Ashwin Bhaskar](https://github.com/ashwinbhaskar)
