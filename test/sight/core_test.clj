@@ -43,7 +43,7 @@
                    (.getMessage e)))
             (is (= 1
                    (m/call-count #'clj-http.client/post)))
-            (is (= ["https://siftrics.com/api/sight/" {:headers            {"Authorization" (str "Basic " (:apikey client))}
+            (is (= ["https://siftrics.com/api/sight/" {:headers            {"Authorization" "Basic 12345678-1234-1234-1234-123456781234"}
                                                        :body               (json/write-str "dummy-payload")
                                                        :content-type       :json
                                                        :socket-timeout     10000
@@ -66,7 +66,7 @@
                    (.getMessage e)))
             (is (= 1
                    (m/call-count #'clj-http.client/post)))
-            (is (= ["https://siftrics.com/api/sight/" {:headers            {"Authorization" (str "Basic " (:apikey client))}
+            (is (= ["https://siftrics.com/api/sight/" {:headers            {"Authorization" "Basic 12345678-1234-1234-1234-123456781234"}
                                                        :body               (json/write-str "dummy-payload")
                                                        :content-type       :json
                                                        :socket-timeout     10000
