@@ -60,7 +60,8 @@
 
 (defn seen-all-pages?
   [file-index->pages]
-  (every? #(every? true? %)
+  (every? #(and (seq %)
+                (every? true? %))
           file-index->pages))
 
 (defn do-poll
