@@ -4,6 +4,30 @@
             [mock-clj.core :as m]
             [clojure.data.json :as json]))
 
+(deftest unsupported-file-extension-test
+  (testing "Should throw an exception when the given file-paths have an unsupported extension"
+    (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
+      (m/with-mock [clj-http.client/post {:status 200
+                                          :body   {:message "success"}}]
+        (try
+          (core/recognize client
+                          (list "/Users/johndoe/Downloads/baz.qux" "/Users/johndoe/Downloads/bax.jpg"))
+          (is false "should not reach this line")
+          (catch Exception e
+            (is (= "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\""
+                   (.getMessage e)))
+            (is (not (m/called? #'clj-http.client/post))))))
+      (m/with-mock [clj-http.client/post {:status 200
+                                          :body   {:message "success"}}]
+        (try
+          (core/recognize client
+                          (list "/Users/johndoe/Downloads/baz.mp4" "/Users/johndoe/Downloads/bax.mp3"))
+          (is false "should not reach this line")
+          (catch Exception e
+            (is (= "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\""
+                   (.getMessage e)))
+            (is (not (m/called? #'clj-http.client/post)))))))))
+
 (deftest sight-api-non-200-response-test
   (testing "Should throw an exception when the response status code is non 200"
     (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
