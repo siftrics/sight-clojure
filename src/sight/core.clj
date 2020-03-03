@@ -19,14 +19,13 @@
 ;; THE SOFTWARE.
 
 (ns sight.core
-  (:import org.apache.commons.codec.binary.Base64
-           (java.io ByteArrayOutputStream))
   (:require [clojure.core.async]
             [clojure.data.json :as json]
             [clojure.java.io]
             [clojure.string]
             [clj-http.client]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [sight.utils :as u]))
 
 (defrecord Client [apikey])
 (defrecord Result [pages])
@@ -40,48 +39,13 @@
 (defrecord Payload [makeSentences files])
 (defrecord FileEntry [mimeType base64File])
 
-(def ^:private extension->mime-type
-  {:pdf  "application/pdf"
-   :bmp  "image/bmp"
-   :gif  "image/gif"
-   :jpeg "image/jpeg"
-   :jpg  "image/jpg"
-   :png  "image/png"})
-
-(defn slurp-bytes
-  "Slurp the bytes from a slurpable thing.
-  https://stackoverflow.com/questions/23018870/how-to-read-a-whole-binary-file-nippy-into-byte-array-in-clojure"
-  [x]
-  (with-open [out (ByteArrayOutputStream.)]
-    (clojure.java.io/copy (clojure.java.io/input-stream x) out)
-    (.toByteArray out)))
-
-(defn file-path->base64file
-  "https://stackoverflow.com/questions/42523024/why-is-image-corrupted-when-converted-to-base64
-  https://stackoverflow.com/questions/23018870/how-to-read-a-whole-binary-file-nippy-into-byte-array-in-clojure"
-  [file-path]
-  (-> file-path
-      slurp-bytes
-      Base64/encodeBase64
-      String.))
-
-(defn- file-extension [file-name]
-  (-> (s/split file-name #"\.")
-      last
-      keyword))
-
-(defn file-path->mimetype
-  [file-path]
-  (if-let [mime-type (-> file-path
-                         file-extension
-                         extension->mime-type)]
-    mime-type
-    (throw (Exception. "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\""))))
 
 (defn file-path->file-entry
   [filepath]
-  (->FileEntry (file-path->mimetype filepath)
-               (file-path->base64file filepath)))
+  (->FileEntry (if-let [mime-type (u/file-path->mimetype filepath)]
+                 mime-type
+                 (throw (Exception. "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\"")))
+               (u/file-path->base64file filepath)))
 
 (defn file-paths->file-entries
   [file-paths]
