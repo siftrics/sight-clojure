@@ -4,7 +4,6 @@
             [clojure.java.io]
             [clojure.string]
             [clj-http.client]
-            [clojure.string :as s]
             [sight.utils :as u]))
 
 (defrecord Client [apikey])
