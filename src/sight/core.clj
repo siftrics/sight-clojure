@@ -64,11 +64,10 @@
                        (recur (rest pages) file-index-2-seen-pages results))))
 
 (defn seen-all-pages?
-  [file-index-2-pages index]
-  (if (>= index (alength file-index-2-pages))
-    true
-    (let [arr (aget file-index-2-pages index)]
-      (and (> (alength arr) 0) (every? true? arr) (recur file-index-2-pages (inc index))))))
+  [file-index->pages index]
+  (or (>= index (alength file-index->pages))
+      (every? #(every? true? %)
+              (drop index file-paths->file-entries))))
 
 (defn do-poll
   [client polling-url num-files]
