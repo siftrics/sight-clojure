@@ -38,7 +38,6 @@
 (defrecord Payload [makeSentences files])
 (defrecord FileEntry [mimeType base64File])
 
-
 (defn file-path->file-entry
   [filepath]
   (->FileEntry (if-let [mime-type (u/file-path->mimetype filepath)]
@@ -76,12 +75,12 @@
             ())
           (aset file-index-2-seen-pages file-index (dec page-number) true))))))
 
+
 (defn handle-poll-pages
-  [pages file-index-2-seen-pages results]
-  (if (empty? pages) ()
-                     (do
-                       (handle-poll-page (first pages) file-index-2-seen-pages results)
-                       (recur (rest pages) file-index-2-seen-pages results))))
+  [pages file-index->seen-pages results]
+  (when (seq pages)
+    (doseq [page pages]
+      (handle-poll-page page file-index->seen-pages results))))
 
 (defn seen-all-pages?
   [file-index->pages index]
