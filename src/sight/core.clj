@@ -130,17 +130,17 @@
 
 (defn recognize-payload
   [client payload]
-  (let [response (clj-http.client/post
-                   "https://siftrics.com/api/sight/"
-                   {:headers            {"Authorization" (str "Basic " (:apikey client))}
-                    :body               (json/write-str payload)
-                    :content-type       :json
-                    :socket-timeout     10000               ;; in milliseconds
-                    :connection-timeout 10000               ;; in milliseconds
-                    :accept             :json})]
-    (if (not= (:status response) 200) (throw (Exception. (str "Non-200 response: " (:status response) "\n" (:body response))))
-                                      (finalize-recognize-response
-                                        client (json/read-str (:body response)) (count (:files payload))))))
+  (let [{:keys [status body]} (clj-http.client/post
+                                "https://siftrics.com/api/sight/"
+                                {:headers            {"Authorization" (str "Basic " (:apikey client))}
+                                 :body               (json/write-str payload)
+                                 :content-type       :json
+                                 :socket-timeout     10000  ;; in milliseconds
+                                 :connection-timeout 10000  ;; in milliseconds
+                                 :accept             :json})]
+    (if (= 200 status)
+      (finalize-recognize-response client (json/read-str body) (count (:files payload)))
+      (throw (Exception. (format "Non-200 response: status %d \n body: %s" status body))))))
 
 (defn recognize
   "Recognize text in the given files"
