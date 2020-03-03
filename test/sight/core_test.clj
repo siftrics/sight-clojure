@@ -4,7 +4,7 @@
             [mock-clj.core :as m]
             [clojure.data.json :as json]))
 
-(deftest sight-ap-non-200-response-test
+(deftest sight-api-non-200-response-test
   (testing "Should throw an exception when the response status code is non 200"
     (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
       (m/with-mock [clj-http.client/post {:status 401
