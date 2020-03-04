@@ -4,7 +4,8 @@
             [clojure.java.io]
             [clojure.string]
             [clj-http.client]
-            [sight.utils :as u]))
+            [sight.utils :as u]
+            [camel-snake-kebab.core :as csk]))
 
 (defrecord Client [api-key])
 (defrecord Result [pages])
@@ -37,20 +38,16 @@
              (file-paths->file-entries file-paths)))
 
 (defn handle-poll-page
-  [page file-index->seen-pages results]
-  (let [error                   (get page "Error")
-        file-index              (get page "FileIndex")
-        page-number             (get page "PageNumber")
-        number-of-pages-in-file (get page "NumberOfPagesInFile")]
-    (assoc! results "Pages" (conj (get results "Pages") page))
-    (if (not (clojure.string/blank? error))
-      (let [newarr (make-array Boolean/TYPE 1)]
-        (aset newarr 0 true)
-        (aset file-index->seen-pages file-index newarr))
-      (do
-        (when (empty? (aget file-index->seen-pages file-index))
-          (aset file-index->seen-pages file-index (make-array Boolean/TYPE number-of-pages-in-file)))
-        (aset file-index->seen-pages file-index (dec page-number) true)))))
+  [{:keys [error file-index page-number number-of-pages-in-file] :as page} file-index->seen-pages results]
+  (assoc! results :pages (conj (:pages results) page))
+  (if (not (clojure.string/blank? error))
+    (let [new-arr (make-array Boolean/TYPE 1)]
+      (aset new-arr 0 true)
+      (aset file-index->seen-pages file-index new-arr))
+    (do
+      (when (empty? (aget file-index->seen-pages file-index))
+        (aset file-index->seen-pages file-index (make-array Boolean/TYPE number-of-pages-in-file)))
+      (aset file-index->seen-pages file-index (dec page-number) true))))
 
 
 (defn handle-poll-pages
@@ -67,23 +64,28 @@
 (defn do-poll
   [{api-key :api-key} polling-url num-files]
   (let [file-index->seen-pages (make-array Boolean/TYPE num-files 0)
-        results                (transient {"Pages" []})]
+        results                (transient {:pages []})]
     (while (not (seen-all-pages? file-index->seen-pages))
       (let [{:keys [status body]} (clj-http.client/get polling-url
                                                        {:headers {"Authorization" (str "Basic " api-key)}})]
         (if (not= status 200)
           (throw (Exception. (str "Non-200 response: " status "\n" body)))
-          (handle-poll-pages (get (json/read-str body) "Pages")
+          (handle-poll-pages (-> body
+                                 (json/read-str :key-fn csk/->kebab-case-keyword)
+                                 :pages)
                              file-index->seen-pages results)))
       (Thread/sleep 500))
     (persistent! results)))
 
 (defn finalize-recognize-response
-  [client response num-files]
-  (if (not (nil? (get response "PollingURL")))
-    (do-poll client (get response "PollingURL") num-files)
-    {"Pages" [{"Error"          "" "FileIndex" 0 "PageNumber" 1 "NumberOfPagesInFile" 1
-               "RecognizedText" (get response "RecognizedText")}]}))
+  [client {:keys [polling-url recognized-text]} num-files]
+  (if (not (nil? polling-url))
+    (do-poll client polling-url num-files)
+    {:pages [{:error                   ""
+              :file-index              0
+              :page-number             1
+              :number-of-pages-in-file 1
+              :recognized-text         recognized-text}]}))
 
 (defn recognize-payload
   [{api-key :api-key :as client} {files :files :as payload}]
@@ -96,7 +98,10 @@
                                  :connection-timeout 10000  ;; in milliseconds
                                  :accept             :json})]
     (if (= 200 status)
-      (finalize-recognize-response client (json/read-str body) (count files))
+      (finalize-recognize-response client
+                                   (-> body
+                                       (json/read-str :key-fn csk/->kebab-case-keyword))
+                                   (count files))
       (throw (Exception. (format "Non-200 response: status %d \n body: %s" status body))))))
 
 (defn recognize
