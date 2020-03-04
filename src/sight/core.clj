@@ -86,7 +86,7 @@
                "RecognizedText" (get response "RecognizedText")}]}))
 
 (defn recognize-payload
-  [{api-key :api-key :as client} payload]
+  [{api-key :api-key :as client} {files :files :as payload}]
   (let [{:keys [status body]} (clj-http.client/post
                                 "https://siftrics.com/api/sight/"
                                 {:headers            {"Authorization" (str "Basic " api-key)}
@@ -96,7 +96,7 @@
                                  :connection-timeout 10000  ;; in milliseconds
                                  :accept             :json})]
     (if (= 200 status)
-      (finalize-recognize-response client (json/read-str body) (count (:files payload)))
+      (finalize-recognize-response client (json/read-str body) (count files))
       (throw (Exception. (format "Non-200 response: status %d \n body: %s" status body))))))
 
 (defn recognize
