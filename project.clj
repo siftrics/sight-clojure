@@ -9,6 +9,7 @@
                  [clj-http "3.10.0"]
                  [commons-codec/commons-codec "1.4"]
                  [mock-clj "0.2.1"]]
+  :plugins [[lein-cloverage "1.1.2"]]
   :deploy-repositories [["releases" :clojars]
                         ["snapshots" :clojars]]
   :repl-options {:init-ns sight.core})
