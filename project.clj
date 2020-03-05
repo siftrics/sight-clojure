@@ -10,6 +10,7 @@
                  [commons-codec/commons-codec "1.4"]
                  [mock-clj "0.2.1"]
                  [camel-snake-kebab "0.4.1"]]
+  :cloverage {:fail-threshold 85}
   :plugins [[lein-cloverage "1.1.2"]]
   :deploy-repositories [["releases" :clojars]
                         ["snapshots" :clojars]]
