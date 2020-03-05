@@ -41,7 +41,7 @@
 
 (defn file-path->file-entry
   [filepath]
-  (->FileEntry (if-let [mime-type (u/file-path->mimetype filepath)]
+  (->FileEntry (if-let [mime-type (u/file-path->mime-type filepath)]
                  mime-type
                  (throw (Exception. "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\"")))
                (u/file-path->base64file filepath)))

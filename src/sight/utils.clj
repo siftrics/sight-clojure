@@ -35,7 +35,7 @@
       last
       keyword))
 
-(defn file-path->mimetype
+(defn file-path->mime-type
   [file-path]
   (-> file-path
       file-extension
