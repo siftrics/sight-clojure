@@ -74,20 +74,20 @@
                     u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="]
         (let [result (core/recognize client
                                      (list "/Users/johndoe/Downloads/baz.jpg"))]
-          (is (= {:pages [{:error "",
-                           :file-index 0,
-                           :page-number 1,
+          (is (= {:pages [{:error                   "",
+                           :file-index              0,
+                           :page-number             1,
                            :number-of-pages-in-file 1,
-                           :recognized-text [{:top-left-y 35,
-                                              :bottom-right-y 47,
-                                              :bottom-left-x 395,
-                                              :top-right-x 449,
-                                              :bottom-left-y 47,
-                                              :top-right-y 35,
-                                              :top-left-x 395,
-                                              :bottom-right-x 449,
-                                              :confidence 0.22863210084975458,
-                                              :text "Invoice"}]}]}
+                           :recognized-text         [{:top-left-y     35,
+                                                      :bottom-right-y 47,
+                                                      :bottom-left-x  395,
+                                                      :top-right-x    449,
+                                                      :bottom-left-y  47,
+                                                      :top-right-y    35,
+                                                      :top-left-x     395,
+                                                      :bottom-right-x 449,
+                                                      :confidence     0.22863210084975458,
+                                                      :text           "Invoice"}]}]}
                  result))
           (is (= 1
                  (m/call-count #'u/file-path->base64file)))
@@ -107,6 +107,82 @@
           (is (= ["https://siftrics.com/api/sight/12345678-1234-1234-1234-123456781234"
                   {:headers {"Authorization" "Basic 12345678-1234-1234-1234-123456781234"}}]
                  (m/last-call #'clj-http.client/get))))))))
+
+(deftest payload-test
+  (testing "Payload when word bounding boxes is false"
+    (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
+      (m/with-mock [u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="
+                    core/recognize-payload  {:pages [{:error                   "",
+                                                      :file-index              0,
+                                                      :page-number             1,
+                                                      :number-of-pages-in-file 1,
+                                                      :recognized-text         [{:top-left-y     35,
+                                                                                 :bottom-right-y 47,
+                                                                                 :bottom-left-x  395,
+                                                                                 :top-right-x    449,
+                                                                                 :bottom-left-y  47,
+                                                                                 :top-right-y    35,
+                                                                                 :top-left-x     395,
+                                                                                 :bottom-right-x 449,
+                                                                                 :confidence     0.22863210084975458,
+                                                                                 :text           "Invoice"}]}]}]
+        (is (= {:pages [{:error                   "",
+                         :file-index              0,
+                         :page-number             1,
+                         :number-of-pages-in-file 1,
+                         :recognized-text         [{:top-left-y     35,
+                                                    :bottom-right-y 47,
+                                                    :bottom-left-x  395,
+                                                    :top-right-x    449,
+                                                    :bottom-left-y  47,
+                                                    :top-right-y    35,
+                                                    :top-left-x     395,
+                                                    :bottom-right-x 449,
+                                                    :confidence     0.22863210084975458,
+                                                    :text           "Invoice"}]}]}
+               (core/recognize client (list "/Users/johndoe/Downloads/baz.jpg"))))
+        (is (= 1
+               (m/call-count #'core/recognize-payload)))
+        (is (= [client (core/->Payload true
+                                       [(core/->FileEntry "image/jpg" "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA==")])]
+               (m/last-call #'core/recognize-payload))))))
+  (testing "Payload when word bounding boxes is false"
+    (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
+      (m/with-mock [u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="
+                    core/recognize-payload  {:pages [{:error                   "",
+                                                      :file-index              0,
+                                                      :page-number             1,
+                                                      :number-of-pages-in-file 1,
+                                                      :recognized-text         [{:top-left-y     35,
+                                                                                 :bottom-right-y 47,
+                                                                                 :bottom-left-x  395,
+                                                                                 :top-right-x    449,
+                                                                                 :bottom-left-y  47,
+                                                                                 :top-right-y    35,
+                                                                                 :top-left-x     395,
+                                                                                 :bottom-right-x 449,
+                                                                                 :confidence     0.22863210084975458,
+                                                                                 :text           "Invoice"}]}]}]
+        (is (= {:pages [{:error                   "",
+                         :file-index              0,
+                         :page-number             1,
+                         :number-of-pages-in-file 1,
+                         :recognized-text         [{:top-left-y     35,
+                                                    :bottom-right-y 47,
+                                                    :bottom-left-x  395,
+                                                    :top-right-x    449,
+                                                    :bottom-left-y  47,
+                                                    :top-right-y    35,
+                                                    :top-left-x     395,
+                                                    :bottom-right-x 449,
+                                                    :confidence     0.22863210084975458,
+                                                    :text           "Invoice"}]}]}
+               (core/recognize client (list "/Users/johndoe/Downloads/baz.jpg") true)))
+        (is (= 1
+               (m/call-count #'core/recognize-payload)))
+        (is (= [client (core/->Payload false
+                                       [(core/->FileEntry "image/jpg" "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA==")])]
+               (m/last-call #'core/recognize-payload)))))))
 
 (deftest unsupported-file-extension-test
   (testing "Should throw an exception when the given file-paths have an unsupported extension"
