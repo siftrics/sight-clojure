@@ -1,4 +1,4 @@
-(defproject sight "1.0.0"
+(defproject sight "1.1.0"
   :description "Official Clojure client for the Sight API, a text recognition service"
   :url "https://github.com/siftrics/sight-clojure"
   :license {:name "Apache-2.0"
