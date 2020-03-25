@@ -9,19 +9,19 @@ This repository contains the official [Sight API](https://siftrics.com/) Clojure
 ### Leiningen/Boot:
 
 ```
-[sight "1.0.0"]
+[sight "1.1.0"]
 ```
 
 ### Clojure CLI/deps.edn:
 
 ```
-sight {:mvn/version "1.0.0"}
+sight {:mvn/version "1.1.0"}
 ```
 
 ### Gradle
 
 ```
-compile 'sight:sight:1.0.0
+compile 'sight:sight:1.1.0
 ```
 
 ### Maven
@@ -30,7 +30,7 @@ compile 'sight:sight:1.0.0
 <dependency>
   <groupId>sight</groupId>
   <artifactId>sight</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
@@ -39,63 +39,45 @@ compile 'sight:sight:1.0.0
 ```
 (ns my-namespace
   ...
-  (:require ...
-            [sight]))
+  (:require [sight.core :as sight]))
 ```
 
 3. Grab an API key from the [Sight dashboard](https://siftrics.com/).
 4. Create a client, passing your API key into the constructor, and recognize text:
 
 ```
-(def client (->Client "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"))
-(def pages (recognize client (list "invoice.pdf" "receipt.png")))
+(let [client (sight/->Client "9736d226-07ff-4ebc-9f53-74461eed2fc3")
+      files  ["/user/foos/dummy.pdf"]]
+  (sight/recognize client files))
 ```
 
-`pages` looks like this:
+Response would look something like this
+```
+{:pages [{:error "",
+          :file-index 0,
+          :page-number 1,
+          :number-of-pages-in-file 1,
+          :recognized-text [{:top-left-y 193,
+                             :bottom-right-y 243,
+                             :bottom-left-x 152,
+                             :top-right-x 500,
+                             :bottom-left-y 248,
+                             :top-right-y 188,
+                             :top-left-x 151,
+                             :bottom-right-x 501,
+                             :confidence 0.10092532855610954,
+                             :text "Dummy PDF file"}]}]}
 
 ```
-{
-      "Pages": [
-        {
-          "Error": "",
-          "FileIndex": 0,
-          "PageNumber": 1,
-          "NumberOfPagesInFile": 3,
-          "RecognizedText": [ ... ]
-        },
-        ...
-      ]
-}
-```
 
-`FileIndex` is the index of this file in the original request's "files" array.
-
-`RecognizedText` looks like this:
-
-```
-    "RecognizedText": [
-        {
-          "Text": "Invoice",
-          "Confidence": 0.22863210084975458
-          "TopLeftX": 395,
-          "TopLeftY": 35,
-          "TopRightX": 449,
-          "TopRightY": 35,
-          "BottomLeftX": 395,
-          "BottomLeftY": 47,
-          "BottomRightX": 449,
-          "BottomRightY": 47,
-        },
-        ...
-      ]
-```
+`:file-index` is the index of this file in the original request's "files" array.
 
 ## Word-Level Bounding Boxes
 
 `recognize` has an additional signature with a third parameter, `word-level-bounding-boxes`. If it's `true` then word-level bounding boxes are returned instead of sentence-level bounding boxes. E.g.,
 
 ```
-(recognize client (list "invoice.pdf" "receipt.png") true)
+(sight/recognize client (list "invoice.pdf" "receipt.png") true)
 ```
 
 ## Official API Documentation
@@ -106,7 +88,11 @@ Here is the [official documentation for the Sight API](https://siftrics.com/docs
 
 This code is licensed under Apache V2.0. The full text of the license can be found in the "LICENSE" file.
 
+# Lead Maintainer
+
+* [Ashwin Bhaskar](https://github.com/ashwinbhaskar)
+
 # Contributors
 
 * [Siftrics Founder](https://github.com/siftrics/)
-* [Ashwin Bhaskar](https://github.com/ashwinbhaskar)
+* [Ashwin Bhaskar](https://github.com/ashwinbhaskar) 
