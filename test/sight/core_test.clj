@@ -127,7 +127,7 @@
                                                                                          }]})}
                     u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="]
         (let [result (core/recognize-stream client
-                                     (list "/Users/johndoe/Downloads/baz.jpg"))]
+                                            (list "/Users/johndoe/Downloads/baz.jpg"))]
           (is (= {:pages [{:error                   ""
                            :file-index              0
                            :page-number             1
@@ -198,7 +198,7 @@
                                                                                                             }]}]})}))
                     u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="]
         (let [result (->> (core/recognize-stream client
-                                             (list "/Users/johndoe/Downloads/baz.jpg"))
+                                                 (list "/Users/johndoe/Downloads/baz.jpg"))
                           (mapcat identity))]
           (is (= [{:error                   "",
                    :file-index              0,
@@ -246,7 +246,136 @@
                  (m/call-count #'clj-http.client/get)))
           (is (= ["https://siftrics.com/api/sight/12345678-1234-1234-1234-123456781234"
                   {:headers {"Authorization" "Basic 12345678-1234-1234-1234-123456781234"}}]
-                 (m/last-call #'clj-http.client/get)))))))
+                 (m/last-call #'clj-http.client/get))))))))
+
+
+
+
+(deftest payload-test
+  (testing "Payload when word bounding boxes is false"
+    (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
+      (m/with-mock [u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="
+                    clj-http.client/post    {:status 200
+                                             :body   (-> {:recognized-text [{:top-left-y     35,
+                                                                             :bottom-right-y 47,
+                                                                             :bottom-left-x  395,
+                                                                             :top-right-x    449,
+                                                                             :bottom-left-y  47,
+                                                                             :top-right-y    35,
+                                                                             :top-left-x     395,
+                                                                             :bottom-right-x 449,
+                                                                             :confidence     0.22863210084975458,
+                                                                             :text           "Invoice"}]}
+                                                         (json/write-str :key-fn csk/->PascalCaseString))}]
+        (is (= {:pages [{:error                   "",
+                         :file-index              0,
+                         :page-number             1,
+                         :number-of-pages-in-file 1,
+                         :recognized-text         [{:top-left-y     35,
+                                                    :bottom-right-y 47,
+                                                    :bottom-left-x  395,
+                                                    :top-right-x    449,
+                                                    :bottom-left-y  47,
+                                                    :top-right-y    35,
+                                                    :top-left-x     395,
+                                                    :bottom-right-x 449,
+                                                    :confidence     0.22863210084975458,
+                                                    :text           "Invoice"}]}]}
+               (core/recognize client (list "/Users/johndoe/Downloads/baz.jpg"))))
+        (is (= 1
+               (m/call-count #'clj-http.client/post)))
+        (is (= ["https://siftrics.com/api/sight/" {:headers            {"Authorization" "Basic 12345678-1234-1234-1234-123456781234"}
+                                                   :body               (json/write-str (core/make-payload (list "/Users/johndoe/Downloads/baz.jpg")
+                                                                                                          false
+                                                                                                          true))
+                                                   :content-type       :json
+                                                   :socket-timeout     10000 ;; in milliseconds
+                                                   :connection-timeout 10000 ;; in milliseconds
+                                                   :accept             :json}]
+               (m/last-call #'clj-http.client/post))))))
+  (testing "Payload when word bounding boxes is true"
+    (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
+      (m/with-mock [u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="
+                    clj-http.client/post    {:status 200
+                                             :body   (-> {:recognized-text [{:top-left-y     35,
+                                                                             :bottom-right-y 47,
+                                                                             :bottom-left-x  395,
+                                                                             :top-right-x    449,
+                                                                             :bottom-left-y  47,
+                                                                             :top-right-y    35,
+                                                                             :top-left-x     395,
+                                                                             :bottom-right-x 449,
+                                                                             :confidence     0.22863210084975458,
+                                                                             :text           "Invoice"}]}
+                                                         (json/write-str :key-fn csk/->PascalCaseString))}]
+        (is (= {:pages [{:error                   "",
+                         :file-index              0,
+                         :page-number             1,
+                         :number-of-pages-in-file 1,
+                         :recognized-text         [{:top-left-y     35,
+                                                    :bottom-right-y 47,
+                                                    :bottom-left-x  395,
+                                                    :top-right-x    449,
+                                                    :bottom-left-y  47,
+                                                    :top-right-y    35,
+                                                    :top-left-x     395,
+                                                    :bottom-right-x 449,
+                                                    :confidence     0.22863210084975458,
+                                                    :text           "Invoice"}]}]}
+               (core/recognize client (list "/Users/johndoe/Downloads/baz.jpg") {:word-level-bounding-boxes? true})))
+        (is (= 1
+               (m/call-count #'clj-http.client/post)))
+        (is (= ["https://siftrics.com/api/sight/" {:headers            {"Authorization" "Basic 12345678-1234-1234-1234-123456781234"}
+                                                   :body               (json/write-str (core/make-payload (list "/Users/johndoe/Downloads/baz.jpg")
+                                                                                                          true
+                                                                                                          true))
+                                                   :content-type       :json
+                                                   :socket-timeout     10000 ;; in milliseconds
+                                                   :connection-timeout 10000 ;; in milliseconds
+                                                   :accept             :json}]
+               (m/last-call #'clj-http.client/post)))))))
+
+(deftest unsupported-file-extension-test
+  (testing "Should throw an exception when the given file-paths have an unsupported extension with one-shot"
+    (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
+      (m/with-mock [clj-http.client/post {:status 200
+                                          :body   {:message "success"}}]
+        (try
+          (core/recognize client
+                          (list "/Users/johndoe/Downloads/baz.qux" "/Users/johndoe/Downloads/bax.jpg"))
+          (is false "should not reach this line")
+          (catch Exception e
+            (is (= "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\""
+                   (.getMessage e)))
+            (is (not (m/called? #'clj-http.client/post))))))
+      (m/with-mock [clj-http.client/post {:status 200
+                                          :body   {:message "success"}}]
+        (try
+          (core/recognize client
+                          (list "/Users/johndoe/Downloads/baz.mp4" "/Users/johndoe/Downloads/bax.mp3"))
+          (is false "should not reach this line")
+          (catch Exception e
+            (is (= "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\""
+                   (.getMessage e)))
+            (is (not (m/called? #'clj-http.client/post))))))))
+  (testing "Should throw an exception when the given file-paths have an unsupported extension with streaming"
+    (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
+      (m/with-mock [clj-http.client/post {:status 200
+                                          :body   {:message "success"}}]
+        (is (= "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\""
+               (-> (core/recognize-stream client
+                                          (list "/Users/johndoe/Downloads/baz.qux" "/Users/johndoe/Downloads/bax.jpg"))
+                   f/message)))
+        (is (not (m/called? #'clj-http.client/post))))
+      (m/with-mock [clj-http.client/post {:status 200
+                                          :body   {:message "success"}}]
+        (is (= "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\""
+               (-> (core/recognize-stream client
+                                          (list "/Users/johndoe/Downloads/baz.mp4" "/Users/johndoe/Downloads/bax.mp3"))
+                   f/message)))
+        (is (not (m/called? #'clj-http.client/post)))))))
+
+(deftest sight-api-non-200-response-streaming-test
   (testing "Should get a failure when GET PollingUrl gives a non 200 response with streaming true"
     (let [client                   (core/->Client "12345678-1234-1234-1234-123456781234")
           polling-url-call-counter (atom 0)]
@@ -296,118 +425,11 @@
                      second
                      f/message))))))))
 
-
-(deftest payload-test
-  (testing "Payload when word bounding boxes is false"
-    (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
-      (m/with-mock [u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="
-                    clj-http.client/post    {:status 200
-                                             :body   (-> {:recognized-text [{:top-left-y     35,
-                                                                             :bottom-right-y 47,
-                                                                             :bottom-left-x  395,
-                                                                             :top-right-x    449,
-                                                                             :bottom-left-y  47,
-                                                                             :top-right-y    35,
-                                                                             :top-left-x     395,
-                                                                             :bottom-right-x 449,
-                                                                             :confidence     0.22863210084975458,
-                                                                             :text           "Invoice"}]}
-                                                         (json/write-str :key-fn csk/->PascalCaseString))}]
-        (is (= {:pages [{:error                   "",
-                         :file-index              0,
-                         :page-number             1,
-                         :number-of-pages-in-file 1,
-                         :recognized-text         [{:top-left-y     35,
-                                                    :bottom-right-y 47,
-                                                    :bottom-left-x  395,
-                                                    :top-right-x    449,
-                                                    :bottom-left-y  47,
-                                                    :top-right-y    35,
-                                                    :top-left-x     395,
-                                                    :bottom-right-x 449,
-                                                    :confidence     0.22863210084975458,
-                                                    :text           "Invoice"}]}]}
-               (core/recognize client (list "/Users/johndoe/Downloads/baz.jpg"))))
-        (is (= 1
-               (m/call-count #'clj-http.client/post)))
-        (is (= ["https://siftrics.com/api/sight/" {:headers            {"Authorization" "Basic 12345678-1234-1234-1234-123456781234"}
-                                                   :body               (json/write-str (core/make-payload (list "/Users/johndoe/Downloads/baz.jpg")
-                                                                                                          false))
-                                                   :content-type       :json
-                                                   :socket-timeout     10000 ;; in milliseconds
-                                                   :connection-timeout 10000 ;; in milliseconds
-                                                   :accept             :json}]
-               (m/last-call #'clj-http.client/post))))))
-  (testing "Payload when word bounding boxes is true"
-    (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
-      (m/with-mock [u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="
-                    clj-http.client/post    {:status 200
-                                             :body   (-> {:recognized-text [{:top-left-y     35,
-                                                                             :bottom-right-y 47,
-                                                                             :bottom-left-x  395,
-                                                                             :top-right-x    449,
-                                                                             :bottom-left-y  47,
-                                                                             :top-right-y    35,
-                                                                             :top-left-x     395,
-                                                                             :bottom-right-x 449,
-                                                                             :confidence     0.22863210084975458,
-                                                                             :text           "Invoice"}]}
-                                                         (json/write-str :key-fn csk/->PascalCaseString))}]
-        (is (= {:pages [{:error                   "",
-                         :file-index              0,
-                         :page-number             1,
-                         :number-of-pages-in-file 1,
-                         :recognized-text         [{:top-left-y     35,
-                                                    :bottom-right-y 47,
-                                                    :bottom-left-x  395,
-                                                    :top-right-x    449,
-                                                    :bottom-left-y  47,
-                                                    :top-right-y    35,
-                                                    :top-left-x     395,
-                                                    :bottom-right-x 449,
-                                                    :confidence     0.22863210084975458,
-                                                    :text           "Invoice"}]}]}
-               (core/recognize client (list "/Users/johndoe/Downloads/baz.jpg") {:word-level-bounding-boxes? true})))
-        (is (= 1
-               (m/call-count #'clj-http.client/post)))
-        (is (= ["https://siftrics.com/api/sight/" {:headers            {"Authorization" "Basic 12345678-1234-1234-1234-123456781234"}
-                                                   :body               (json/write-str (core/make-payload (list "/Users/johndoe/Downloads/baz.jpg")
-                                                                                                          true))
-                                                   :content-type       :json
-                                                   :socket-timeout     10000 ;; in milliseconds
-                                                   :connection-timeout 10000 ;; in milliseconds
-                                                   :accept             :json}]
-               (m/last-call #'clj-http.client/post)))))))
-
-(deftest unsupported-file-extension-test
-  (testing "Should throw an exception when the given file-paths have an unsupported extension"
-    (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
-      (m/with-mock [clj-http.client/post {:status 200
-                                          :body   {:message "success"}}]
-        (try
-          (core/recognize client
-                          (list "/Users/johndoe/Downloads/baz.qux" "/Users/johndoe/Downloads/bax.jpg"))
-          (is false "should not reach this line")
-          (catch Exception e
-            (is (= "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\""
-                   (.getMessage e)))
-            (is (not (m/called? #'clj-http.client/post))))))
-      (m/with-mock [clj-http.client/post {:status 200
-                                          :body   {:message "success"}}]
-        (try
-          (core/recognize client
-                          (list "/Users/johndoe/Downloads/baz.mp4" "/Users/johndoe/Downloads/bax.mp3"))
-          (is false "should not reach this line")
-          (catch Exception e
-            (is (= "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\""
-                   (.getMessage e)))
-            (is (not (m/called? #'clj-http.client/post)))))))))
-
-(deftest sight-api-non-200-response-test
+(deftest sight-api-non-200-response-one-shot-test
   (testing "Should throw an exception when the response status code is non 200"
     (let [client (core/->Client "12345678-1234-1234-1234-123456781234")]
-      (m/with-mock [clj-http.client/post {:status 401
-                                          :body   {:message "you are not authorized to use this api"}}
+      (m/with-mock [clj-http.client/post    {:status 401
+                                             :body   {:message "you are not authorized to use this api"}}
                     u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="]
         (try
           (core/recognize client
@@ -426,8 +448,8 @@
                                                        :headers            {"Authorization" "Basic 12345678-1234-1234-1234-123456781234"}
                                                        :socket-timeout     10000}]
                    (m/last-call #'clj-http.client/post))))))
-      (m/with-mock [clj-http.client/post {:status 500
-                                          :body   {:message "Internal server error"}}
+      (m/with-mock [clj-http.client/post    {:status 500
+                                             :body   {:message "Internal server error"}}
                     u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="]
         (try
           (core/recognize client

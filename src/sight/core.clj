@@ -67,22 +67,27 @@
         (f/fail (format "Non-200 response: status %d \n body: %s" status body))))))
 
 (defn file-path->file-entry
-  [filepath]
-  (->FileEntry (if-let [mime-type (u/file-path->mime-type filepath)]
-                 mime-type
-                 (throw (Exception. "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\"")))
-               (u/file-path->base64file filepath)))
+  [file-path throw-exception?]
+  (let [mime-type (u/file-path->mime-type file-path)]
+    (if mime-type
+      (->FileEntry mime-type (u/file-path->base64file file-path))
+      (if throw-exception?
+        (throw (Exception. "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\""))
+        (f/fail "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\"")))))
 
 (defn file-paths->file-entries
-  [file-paths]
-  (if (empty? file-paths)
-    []
-    (map file-path->file-entry file-paths)))
+  [file-paths throw-exception?]
+  (f/attempt-all [result (map #(file-path->file-entry % throw-exception?) file-paths)
+                  _      (some #(if (f/failed? %)
+                                 %)
+                               result)]
+    result))
 
 (defn make-payload
-  [file-paths word-level-bounding-boxes]
-  (->Payload (not word-level-bounding-boxes)
-             (file-paths->file-entries file-paths)))
+  [file-paths word-level-bounding-boxes throw-exception?]
+  (f/if-let-ok? [file-entries (file-paths->file-entries file-paths throw-exception?)]
+    (->Payload (not word-level-bounding-boxes)
+               file-entries)))
 
 (defn mark-page-as-seen!
   [{:keys [error file-index page-number number-of-pages-in-file] :as page} file-index->seen-pages results]
@@ -149,7 +154,7 @@
   "Recognize text in the given files"
   ([client file-paths] (recognize client file-paths {}))
   ([client file-paths {:keys [stream? word-level-bounding-boxes?] :as opts}]
-   (let [payload (make-payload file-paths word-level-bounding-boxes?)
+   (let [payload (make-payload file-paths word-level-bounding-boxes? true)
          result  (sight-post client payload true)]
      (recognize-payload
        client
@@ -161,8 +166,8 @@
   "Recognize text in the given files"
   ([client file-paths] (recognize-stream client file-paths false))
   ([client file-paths word-level-bounding-boxes?]
-   (let [payload (make-payload file-paths word-level-bounding-boxes?)
-         result  (sight-post client payload false)]
+   (f/attempt-all [payload (make-payload file-paths word-level-bounding-boxes? false)
+                   result  (sight-post client payload false)]
      (recognize-payload
        client
        result
