@@ -46,7 +46,7 @@ compile 'sight:sight:1.1.0
 4. Create a client, passing your API key into the constructor, and recognize text:
 
 ```
-(let [client (sight/->Client "9736d226-07ff-4ebc-9f53-74461eed2fc3")
+(let [client (sight/->Client "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
       files  ["/user/foos/dummy.pdf"]]
   (sight/recognize client files))
 ```
