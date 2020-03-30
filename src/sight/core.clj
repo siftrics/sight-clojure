@@ -127,7 +127,7 @@
                   (f/if-let-ok? [pages (sight-get client polling-url false)]
                     (do
                       (mark-pages-as-seen! pages file-index->seen-pages results)
-                      (Thread/sleep 2000)
+                      (Thread/sleep 500)
                       pages)
                     (do
                       (swap! failure-count inc)
