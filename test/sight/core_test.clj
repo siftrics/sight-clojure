@@ -242,7 +242,7 @@
                                                      :connection-timeout 10000
                                                      :accept             :json}]
                  (m/last-call #'clj-http.client/post)))
-          (is (= 2
+          (is (= 3
                  (m/call-count #'clj-http.client/get)))
           (is (= ["https://siftrics.com/api/sight/12345678-1234-1234-1234-123456781234"
                   {:headers {"Authorization" "Basic 12345678-1234-1234-1234-123456781234"}}]
