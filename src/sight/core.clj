@@ -79,7 +79,7 @@
   [file-paths throw-exception?]
   (f/attempt-all [result (map #(file-path->file-entry % throw-exception?) file-paths)
                   _      (some #(if (f/failed? %)
-                                 %)
+                                  %)
                                result)]
     result))
 
@@ -101,7 +101,6 @@
         (aset file-index->seen-pages file-index (make-array Boolean/TYPE number-of-pages-in-file)))
       (aset file-index->seen-pages file-index (dec page-number) true))))
 
-
 (defn mark-pages-as-seen!
   [pages file-index->seen-pages results]
   (doseq [page pages]
@@ -117,21 +116,20 @@
   [client polling-url num-files stream?]
   (let [file-index->seen-pages (make-array Boolean/TYPE num-files 0)
         results                (transient {:pages []})
-        failure-count          (atom 0)]
+        failure-count          (atom 0)
+        fetch                  (fn []
+                                 (Thread/sleep 500)
+                                 (sight-get client polling-url false))]
     (if stream?
-      (->> (range)
-           (take-while (fn [_]
-                         (and (not (seen-all-pages? file-index->seen-pages))
-                              (= 0 @failure-count))))
-           (map (fn [_]
-                  (f/if-let-ok? [pages (sight-get client polling-url false)]
-                    (do
-                      (mark-pages-as-seen! pages file-index->seen-pages results)
-                      (Thread/sleep 500)
-                      pages)
-                    (do
-                      (swap! failure-count inc)
-                      pages))))
+      (->> (repeatedly fetch)
+           (take-while (fn [pages]
+                         (if (f/failed? pages)
+                           (= 1 (swap! failure-count inc))
+                           (if (seen-all-pages? file-index->seen-pages)
+                             false
+                             (do
+                               (mark-pages-as-seen! pages file-index->seen-pages results)
+                               true)))))
            (filter (comp not empty?)))
       (do
         (while (not (seen-all-pages? file-index->seen-pages))
