@@ -128,20 +128,20 @@
                     u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="]
         (let [result (core/recognize-stream client
                                             (list "/Users/johndoe/Downloads/baz.jpg"))]
-          (is (= {:pages [{:error                   ""
-                           :file-index              0
-                           :page-number             1
-                           :number-of-pages-in-file 1
-                           :recognized-text         [{:top-left-y     35,
-                                                      :bottom-right-y 47,
-                                                      :bottom-left-x  395,
-                                                      :top-right-x    449,
-                                                      :bottom-left-y  47,
-                                                      :top-right-y    35,
-                                                      :top-left-x     395,
-                                                      :bottom-right-x 449,
-                                                      :confidence     0.22863210084975458,
-                                                      :text           "Invoice"}]}]}
+          (is (= [[{:error                   ""
+                    :file-index              0
+                    :page-number             1
+                    :number-of-pages-in-file 1
+                    :recognized-text         [{:top-left-y     35,
+                                               :bottom-right-y 47,
+                                               :bottom-left-x  395,
+                                               :top-right-x    449,
+                                               :bottom-left-y  47,
+                                               :top-right-y    35,
+                                               :top-left-x     395,
+                                               :bottom-right-x 449,
+                                               :confidence     0.22863210084975458,
+                                               :text           "Invoice"}]}]]
                  result))
           (is (= 1
                  (m/call-count #'u/file-path->base64file)))

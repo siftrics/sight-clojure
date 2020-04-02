@@ -142,11 +142,17 @@
   [client {:keys [polling-url recognized-text]} num-files stream?]
   (if polling-url
     (do-poll client polling-url num-files stream?)
-    {:pages [{:error                   ""
-              :file-index              0
-              :page-number             1
-              :number-of-pages-in-file 1
-              :recognized-text         recognized-text}]}))
+    (if stream?
+      (lazy-seq [[{:error                   ""
+                   :file-index              0
+                   :page-number             1
+                   :number-of-pages-in-file 1
+                   :recognized-text         recognized-text}]])
+      {:pages [{:error                   ""
+                :file-index              0
+                :page-number             1
+                :number-of-pages-in-file 1
+                :recognized-text         recognized-text}]})))
 
 (defn recognize
   "Recognize text in the given files"
