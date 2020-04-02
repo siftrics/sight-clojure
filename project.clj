@@ -15,4 +15,5 @@
   :plugins [[lein-cloverage "1.1.2"]]
   :deploy-repositories [["releases" :clojars]
                         ["snapshots" :clojars]]
+  :profiles {:dev {:resource-paths ["test/resources"]}}
   :repl-options {:init-ns sight.core})
