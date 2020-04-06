@@ -1,4 +1,4 @@
-[![Clojars Project](https://img.shields.io/clojars/v/sight.svg)](https://clojars.org/sight) ![Clojure CI](https://github.com/ashwinbhaskar/sight-clojure/workflows/Clojure%20CI/badge.svg)
+[![Clojars Project](https://img.shields.io/clojars/v/sight.svg)](https://clojars.org/sight) ![Clojure CI](https://github.com/ashwinbhaskar/sight-clojure/workflows/Clojure%20CI/badge.svg) [![codecov](https://codecov.io/gh/ashwinbhaskar/sight-clojure/branch/master/graph/badge.svg)](https://codecov.io/gh/ashwinbhaskar/sight-clojure)
 
 This repository contains the official [Sight API](https://siftrics.com/) Clojure client. The Sight API is a text recognition service.
 
