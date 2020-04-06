@@ -16,4 +16,4 @@ jobs:
         API_KEY: ${{ secrets.API_KEY }}
       run: lein cloverage
     - name: Upload Test Report
-      run: bash <(curl -s https://codecov.io/bash)
+      run: CLOVERAGE_VERSION=1.1.2; lein cloverage --codecov; bash <(curl -s https://codecov.io/bash)
