@@ -12,4 +12,8 @@ jobs:
     - name: Install dependencies
       run: lein deps
     - name: Run tests
+      env:
+        API_KEY: ${{ secrets.API_KEY }}
       run: lein cloverage
+    - name: Upload Test Report
+      run: bash <(curl -s https://codecov.io/bash)
