@@ -35,7 +35,6 @@
   [text confidence
    topLeftX topLeftY topRightX topRightY
    bottomLeftX bottomLeftY bottomRightX bottomRightY])
-
 (defrecord Payload [makeSentences files])
 (defrecord FileEntry [mimeType base64File])
 
