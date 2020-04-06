@@ -4,7 +4,7 @@
             [clojure.java.io :as io]))
 
 (deftest test-sanity
-  (testing "Should recognize all the words"
+  (testing "Should recognize all the words with one shot and streaming"
     (let [client   (core/->Client (System/getenv "API_KEY"))
           resource (io/resource "dummy.pdf")
           files    (list (-> resource
