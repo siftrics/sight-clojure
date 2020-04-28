@@ -9,9 +9,11 @@
                  [clj-http "3.10.0"]
                  [commons-codec/commons-codec "1.4"]
                  [mock-clj "0.2.1"]
-                 [camel-snake-kebab "0.4.1"]]
+                 [camel-snake-kebab "0.4.1"]
+                 [failjure "2.0.0"]]
   :cloverage {:fail-threshold 85}
   :plugins [[lein-cloverage "1.1.2"]]
   :deploy-repositories [["releases" :clojars]
                         ["snapshots" :clojars]]
+  :profiles {:dev {:resource-paths ["test/resources"]}}
   :repl-options {:init-ns sight.core})
