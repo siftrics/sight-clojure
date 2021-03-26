@@ -12,8 +12,13 @@
                  [camel-snake-kebab "0.4.1"]
                  [failjure "2.0.0"]]
   :cloverage {:fail-threshold 85}
-  :plugins [[lein-cloverage "1.1.2"]]
+  :plugins [[lein-cloverage "1.1.2"]
+            [lein-cljfmt "0.7.0"]]
   :deploy-repositories [["releases" :clojars]
                         ["snapshots" :clojars]]
   :profiles {:dev {:resource-paths ["test/resources"]}}
-  :repl-options {:init-ns sight.core})
+  :repl-options {:init-ns sight.core}
+  :cljfmt {:indents {f/if-let-ok?   [[:inner 0]]
+                     f/attempt-all  [[:inner 0]]
+                     f/if-let-failed? [[:inner 0]]
+                     use-fixtures   [[:block 0]]}})
