@@ -135,7 +135,7 @@
       false))))
 
 (defn recognize-stream
-  "Recognize text in the given files"
+  "Recognize text in the given files and return it as a lazy sequence"
   ([client file-paths] (recognize-stream client file-paths false))
   ([client file-paths word-level-bounding-boxes?]
    (f/attempt-all [payload (make-payload file-paths word-level-bounding-boxes? false)
