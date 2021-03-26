@@ -19,53 +19,24 @@
 ;; THE SOFTWARE.
 
 (ns sight.core
-  (:require [clojure.data.json :as json]
-            [clojure.java.io]
+  (:require [clojure.java.io]
             [clojure.string]
-            [clj-http.client]
             [sight.utils :as u]
-            [camel-snake-kebab.core :as csk]
-            [failjure.core :as f]))
+            [failjure.core :as f]
+            [sight.http :as http]))
 
 (defrecord Client [api-key])
 (defrecord Result [pages])
 (defrecord RecognizedPage
-  [error fileIndex pageNumber numberOfPagesInFile recognizedText])
+           [error fileIndex pageNumber numberOfPagesInFile recognizedText])
 (defrecord RecognizedText
-  [text confidence
-   topLeftX topLeftY topRightX topRightY
-   bottomLeftX bottomLeftY bottomRightX bottomRightY])
+           [text confidence
+            topLeftX topLeftY topRightX topRightY
+            bottomLeftX bottomLeftY bottomRightX bottomRightY])
 (defrecord Payload [makeSentences files])
 (defrecord FileEntry [mimeType base64File])
 
-(defn- sight-get [{api-key :api-key} polling-url throw-exception?]
-  (let [{:keys [status body]} (clj-http.client/get polling-url
-                                                   {:headers {"Authorization" (str "Basic " api-key)}})]
-    (if (= status 200)
-      (-> body
-          (json/read-str :key-fn csk/->kebab-case-keyword)
-          :pages)
-      (if throw-exception?
-        (throw (Exception. (str "Non-200 response: " status "\n" body)))
-        (f/fail (str "Non-200 response: " status "\n" body))))))
-
-(defn- sight-post [{api-key :api-key} payload throw-exception?]
-  (let [{:keys [status body]} (clj-http.client/post
-                                "https://siftrics.com/api/sight/"
-                                {:headers            {"Authorization" (str "Basic " api-key)}
-                                 :body               (json/write-str payload)
-                                 :content-type       :json
-                                 :socket-timeout     10000  ;; in milliseconds
-                                 :connection-timeout 10000  ;; in milliseconds
-                                 :accept             :json})]
-    (if (= 200 status)
-      (-> body
-          (json/read-str :key-fn csk/->kebab-case-keyword))
-      (if throw-exception?
-        (throw (Exception. (str "Non-200 response: " status "\n" body)))
-        (f/fail (format "Non-200 response: status %d \n body: %s" status body))))))
-
-(defn file-path->file-entry
+(defn- file-path->file-entry
   [file-path throw-exception?]
   (let [mime-type (u/file-path->mime-type file-path)]
     (if mime-type
@@ -74,21 +45,19 @@
         (throw (Exception. "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\""))
         (f/fail "invalid file extension; must be one of \".pdf\", \".bmp\", \".gif\", \".jpeg\", \".jpg\", or \".png\"")))))
 
-(defn file-paths->file-entries
+(defn- file-paths->file-entries
   [file-paths throw-exception?]
-  (f/attempt-all [result (map #(file-path->file-entry % throw-exception?) file-paths)
-                  _      (some #(if (f/failed? %)
-                                  %)
-                               result)]
-    result))
+  (let [result (map #(file-path->file-entry % throw-exception?) file-paths)]
+    (f/if-let-failed? [failure (some (fn [r] (when (f/failed? r) r)) result)]
+      failure
+      result)))
 
 (defn make-payload
   [file-paths word-level-bounding-boxes throw-exception?]
   (f/if-let-ok? [file-entries (file-paths->file-entries file-paths throw-exception?)]
-    (->Payload (not word-level-bounding-boxes)
-               file-entries)))
+    (->Payload (not word-level-bounding-boxes) file-entries)))
 
-(defn mark-page-as-seen!
+(defn- mark-page-as-seen!
   [{:keys [error file-index page-number number-of-pages-in-file] :as page} file-index->seen-pages results]
   (assoc! results :pages (conj (:pages results) page))
   (if (not (clojure.string/blank? error))
@@ -100,25 +69,25 @@
         (aset file-index->seen-pages file-index (make-array Boolean/TYPE number-of-pages-in-file)))
       (aset file-index->seen-pages file-index (dec page-number) true))))
 
-(defn mark-pages-as-seen!
+(defn- mark-pages-as-seen!
   [pages file-index->seen-pages results]
   (doseq [page pages]
     (mark-page-as-seen! page file-index->seen-pages results)))
 
-(defn seen-all-pages?
+(defn- seen-all-pages?
   [file-index->pages]
   (every? #(and (seq %)
                 (every? true? %))
           file-index->pages))
 
-(defn do-poll
+(defn- poll
   [client polling-url num-files stream?]
   (let [file-index->seen-pages (make-array Boolean/TYPE num-files 0)
-        results                (transient {:pages []})
-        failure-count          (atom 0)
-        fetch                  (fn []
-                                 (Thread/sleep 500)
-                                 (sight-get client polling-url false))]
+        results (transient {:pages []})
+        failure-count (atom 0)
+        fetch (fn []
+                (Thread/sleep 500)
+                (http/get client polling-url false))]
     (if stream?
       (->> (repeatedly fetch)
            (take-while (fn [pages]
@@ -132,7 +101,7 @@
            (filter (comp not empty?)))
       (do
         (while (not (seen-all-pages? file-index->seen-pages))
-          (let [pages (sight-get client polling-url true)]
+          (let [pages (http/get client polling-url true)]
             (mark-pages-as-seen! pages file-index->seen-pages results))
           (Thread/sleep 500))
         (persistent! results)))))
@@ -140,7 +109,7 @@
 (defn recognize-payload
   [client {:keys [polling-url recognized-text]} num-files stream?]
   (if polling-url
-    (do-poll client polling-url num-files stream?)
+    (poll client polling-url num-files stream?)
     (if stream?
       (lazy-seq [[{:error                   ""
                    :file-index              0
@@ -158,21 +127,21 @@
   ([client file-paths] (recognize client file-paths {}))
   ([client file-paths {:keys [stream? word-level-bounding-boxes?] :as opts}]
    (let [payload (make-payload file-paths word-level-bounding-boxes? true)
-         result  (sight-post client payload true)]
+         result (http/post client payload true)]
      (recognize-payload
-       client
-       result
-       (count file-paths)
-       false))))
+      client
+      result
+      (count file-paths)
+      false))))
 
 (defn recognize-stream
   "Recognize text in the given files"
   ([client file-paths] (recognize-stream client file-paths false))
   ([client file-paths word-level-bounding-boxes?]
    (f/attempt-all [payload (make-payload file-paths word-level-bounding-boxes? false)
-                   result  (sight-post client payload false)]
+                   result (http/post client payload false)]
      (recognize-payload
-       client
-       result
-       (count file-paths)
-       true))))
+      client
+      result
+      (count file-paths)
+      true))))

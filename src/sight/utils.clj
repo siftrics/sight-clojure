@@ -2,8 +2,8 @@
   (:require [clojure.string :as s]
             [clojure.string :as s])
   (:import
-    org.apache.commons.codec.binary.Base64
-    (java.io ByteArrayOutputStream)))
+   org.apache.commons.codec.binary.Base64
+   (java.io ByteArrayOutputStream)))
 
 (def ^:private extension->mime-type
   {:pdf  "application/pdf"
