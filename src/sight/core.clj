@@ -106,7 +106,7 @@
           (Thread/sleep 500))
         (persistent! results)))))
 
-(defn recognize-payload
+(defn- recognize-payload
   [client {:keys [polling-url recognized-text]} num-files stream?]
   (if polling-url
     (poll client polling-url num-files stream?)
