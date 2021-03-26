@@ -20,8 +20,7 @@
                                                                                          "BottomLeftX"  395
                                                                                          "BottomLeftY"  47
                                                                                          "BottomRightX" 449
-                                                                                         "BottomRightY" 47
-                                                                                         }]})}
+                                                                                         "BottomRightY" 47}]})}
                     u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="]
         (let [result (core/recognize client
                                      (list "/Users/johndoe/Downloads/baz.jpg"))]
@@ -71,8 +70,7 @@
                                                                                                         "BottomLeftX"  395
                                                                                                         "BottomLeftY"  47
                                                                                                         "BottomRightX" 449
-                                                                                                        "BottomRightY" 47
-                                                                                                        }]}]})}
+                                                                                                        "BottomRightY" 47}]}]})}
                     u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="]
         (let [result (core/recognize client
                                      (list "/Users/johndoe/Downloads/baz.jpg"))]
@@ -123,8 +121,7 @@
                                                                                          "BottomLeftX"  395
                                                                                          "BottomLeftY"  47
                                                                                          "BottomRightX" 449
-                                                                                         "BottomRightY" 47
-                                                                                         }]})}
+                                                                                         "BottomRightY" 47}]})}
                     u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="]
         (let [result (core/recognize-stream client
                                             (list "/Users/johndoe/Downloads/baz.jpg"))]
@@ -178,8 +175,7 @@
                                                                                                             "BottomLeftX"  395
                                                                                                             "BottomLeftY"  47
                                                                                                             "BottomRightX" 449
-                                                                                                            "BottomRightY" 47
-                                                                                                            }]}]})}
+                                                                                                            "BottomRightY" 47}]}]})}
                                                 {:status 200
                                                  :body   (json/write-str {"Pages" [{"Error"               "",
                                                                                     "FileIndex"           0,
@@ -194,8 +190,7 @@
                                                                                                             "BottomLeftX"  395
                                                                                                             "BottomLeftY"  47
                                                                                                             "BottomRightX" 449
-                                                                                                            "BottomRightY" 47
-                                                                                                            }]}]})}))
+                                                                                                            "BottomRightY" 47}]}]})}))
                     u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="]
         (let [result (->> (core/recognize-stream client
                                                  (list "/Users/johndoe/Downloads/baz.jpg"))
@@ -247,9 +242,6 @@
           (is (= ["https://siftrics.com/api/sight/12345678-1234-1234-1234-123456781234"
                   {:headers {"Authorization" "Basic 12345678-1234-1234-1234-123456781234"}}]
                  (m/last-call #'clj-http.client/get))))))))
-
-
-
 
 (deftest payload-test
   (testing "Payload when word bounding boxes is false"
@@ -398,8 +390,7 @@
                                                                                                             "BottomLeftX"  395
                                                                                                             "BottomLeftY"  47
                                                                                                             "BottomRightX" 449
-                                                                                                            "BottomRightY" 47
-                                                                                                            }]}]})}
+                                                                                                            "BottomRightY" 47}]}]})}
                                                 {:status 500
                                                  :body   "Internal Server Error"}))
                     u/file-path->base64file "YWxzZGtmanNhbGtkZmogYWxzZGtmamFzbGtkZmphc2xka2ZqYXNkbGtmaiBhbHNrZGZqbHNhZA=="]
